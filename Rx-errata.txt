@@ -1,5 +1,8 @@
 Errata list
 
+Exercises 1.4 and 1.5: 
+X has Binomial(n=12, p=1/6) distribution
+
 Page 49, line 4 from bottom.
 status = as.integer(twins$Social)
 
