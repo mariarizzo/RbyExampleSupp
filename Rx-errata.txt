@@ -1,8 +1,5 @@
 Errata list
 
-Exercises 1.4 and 1.5: 
-X has Binomial(n=12, p=1/6) distribution
-
 Page 49, line 4 from bottom.
 status = as.integer(twins$Social)
 
@@ -15,7 +12,7 @@ with
 as.numeric(factor(Gender))
 
 Page 83, line 2 from bottom.
-counts = cbind(Bin, Weldon) should be 
+counts = cbind(Bin, Weldon) should be
 counts = cbind(Binom, Weldon)
 
 Page 141, last line
@@ -25,6 +22,23 @@ plot(bgsu$Year, bgsu$Enrollment)
 Page 147
 Should be
 stem(froot)
+
+Page 163
+Change
+twins = read.table("twins.txt", header=TRUE)
+to
+twins = read.table("twins.txt", header=TRUE, sep=",")
+or
+twins = read.csv("twins.txt")
+
+Page 234
+There are three poisons in poison data (not four).
+
+Page 234
+Use as.is=FALSE or stringsAsFactors=FALSE: that is, change
+read.csv("poison.csv")
+to
+read.csv("poison.csv", as.is=FALSE)
 
 Page 260
 Should be
