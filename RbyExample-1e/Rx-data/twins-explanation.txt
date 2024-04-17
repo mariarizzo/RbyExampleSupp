@@ -1,0 +1,117 @@
+====================================================
+KEYWORDS FOR DATASET: Income, Education Level, Twins
+====================================================
+
+===============================================================
+ACCOMPANYING DATA PROVIDED BY: Guido Imbens, PhD 
+                               UCLA, Department of Economics
+===============================================================
+
+================================
+GENERAL EXPLANATION OF THE STUDY
+================================
+The original study that used these data sought to answer what seems
+a simple question: By how much will another year of schooling most likely 
+raise one's income? Attempts had been made to estimate the value of a year's 
+education in previous studies, but previous estimates may have been 
+imprecise for two reasons. The first, most obvious reason is the difficulty 
+of extracting education's effect on income from the effect that other 
+variables related to education have on income. That is, a worker's natural 
+ability, his family background, and his innate intelligence are all possible 
+confounding factors that must be controlled for to estimate the effect of 
+education on income accurately. Thus this study interviewed twins, 
+collecting information about education, income, and background. Because
+monozygotic twins (twins from a single egg) are genetically identical and 
+have similar family backgrounds, they provide an excellent control for 
+confounding variables. 
+
+The second difficulty in measuring the effect of income on education has
+to do with the false reporting of education levels, and this study is the 
+first to address it. Since people are more likely to report a higher 
+education level than they have actually attained, especially in face to 
+face interviews, the data will contain a number of people with lower 
+education levels in the higher education categories. Thus, since education 
+usually increases income, estimates for the precise amount of this 
+increase will be too low. To correct for this bias the researchers 
+interviewed the twins separately and recorded two entries for each 
+individual's education level: his self-reported education level and the
+education level reported by his twin. This allowed them to estimate the 
+"measurement error" of reported education levels and correct for it. The 
+result was a much higher estimate of the effect a year of education is 
+likely to have on one's income. In fact, this study's estimates were 
+higher than those of all previous studies, which did not correct for 
+measurement error in education level.  
+
+The full citation for the published study is below. It is also available 
+on the web at JSTOR, located at "www.jstor.org".  
+
+Ashenfelter, Orley and Krueger, Alan.  "Estimates of the Economic Return 
+	to Schooling from a New Sample of Twins."  The American Economic 
+	Review 84.5 (Dec. 1994) 1157-1173.
+	
+=============================
+BRIEF DESCRIPTION OF THE DATA          
+=============================
+The data were collected by a team of five interviewers at the 16th Annual 
+Twins Day Festival in Twinsburg, Ohio, in August 1991. A booth was set up 
+at the festival's main entrance, and an ad inviting all adult twins to 
+participate in the survey was placed in the festival program. In addition, 
+the interviews roamed the festival grounds, approaching all adult twins for 
+an interview, and almost every pair of twins accepted. 
+
+In total, 495 individuals over the age of 18 were interviewed. 
+
+========================
+HOW TO USE THE DATA FILE
+========================
+The data file is comma delimited text. Each row contains information on a 
+pair of twins for sixteen variables, which are explained below. 
+Note that the each individual in a pair of twins was randomly assigned a 
+number: twin 1 or twin 2.
+
+Missing data are indicated by a period.
+
+NOTE: For most data analysis purposes, the logarithm of the hourly wage is 
+used instead of the hourly wage itself. 
+
+DLHRWAGE......the difference (twin 1 minus twin 2) in the logarithm of 
+              hourly wage, given in dollars.                                              
+DEDUC1........the difference (twin 1 minus twin 2) in self-reported 
+	      education, given in years.                                        
+AGE...........Age in years of twin 1.                                                 
+AGESQ.........AGE squared. 
+HRWAGEH.......Hourly wage of twin 2. 
+WHITEH........1 if twin 2 is white, 0 otherwise.
+MALEH.........1 if twin 2 is male, 0 otherwise.
+EDUCH.........Self-reported education (in years) of twin 2.
+HRWAGEL.......Hourly wage of twin 1.
+WHITEL........1 if twin 1 is white, 0 otherwise.
+MALEL.........1 if twin 1 is male, 0 otherwise.
+EDUCL.........Self-reported education (in years) of twin 1.
+DEDUC2........the difference (twin 1 minus twin 2) in cross-reported 
+              education. Twin 1's cross-reported education, for example,
+              is the number of years of schooling completed by twin 1 as
+              reported by twin 2.                                     
+DTEN..........the difference (twin 1 minus twin 2) in tenure, or number of 
+	      years at current job.
+DMARRIED......the difference (twin 1 minus twin 2) in marital status, where
+              1 signifies "married" and 0 signifies "unmarried". 
+DUNCOV........the difference (twin 1 minus twin 2) in union coverage, where
+              1 signifies "covered" and 0 "uncovered". 
+                                                        
+================================================
+STATISTICAL TESTS AND ANALYSES USED IN THE STUDY
+================================================
+1) one-sample t-test
+2) two-sample t-test
+3) Linear Regression
+4) Ordinary Least Squares
+5) Generalized Least Squares
+6) Maximum Liklihood Estimation
+7) Method of Moments Estimation
+
+
+
+Go To Raw Data 
+Download Stata File 
+Return to Previous Page 

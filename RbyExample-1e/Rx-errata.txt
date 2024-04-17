@@ -1,0 +1,64 @@
+Errata list
+
+Page 49, line 4 from bottom.
+status = as.integer(twins$Social)
+
+Page 55, line 1. Due to changes in R-2.14.0,
+replace FUN=mean with FUN=colMeans
+
+Page 55. Due to changes in R-4.0.0, replace
+as.integer(Gender)
+with
+as.numeric(factor(Gender))
+
+Page 83, line 2 from bottom.
+counts = cbind(Bin, Weldon) should be
+counts = cbind(Binom, Weldon)
+
+Page 141, last line
+Should be
+plot(bgsu$Year, bgsu$Enrollment)
+
+Page 147
+Should be
+stem(froot)
+
+Page 163
+Change
+twins = read.table("twins.txt", header=TRUE)
+to
+twins = read.table("twins.txt", header=TRUE, sep=",")
+or
+twins = read.csv("twins.txt")
+
+Page 234
+There are three poisons in poison data (not four).
+
+Page 234
+Use as.is=FALSE or stringsAsFactors=FALSE: that is, change
+read.csv("poison.csv")
+to
+read.csv("poison.csv", as.is=FALSE)
+
+Page 260
+Should be
+times.in.lead = S["L", ]
+
+Page 265
+Function should be
+prop.no.matches = function(n){
+matches = replicate(10000, scramble.hats(n))
+sum(matches == 0) / 10000
+}
+
+Page 265, line 7 up from section 11.4.  Should be
+many.probs = sapply(2:20, prop.no.matches)
+
+Page 272, line 6
+It is said that there are 10,000 simulations, but the
+R code says 100,000 simulations.
+
+Page 288, line 4
+Should be
+sim = metrop.hasting.rw(mylogpost, 1, 0.2, 1000, 331.6, 270.3)
+
