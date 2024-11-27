@@ -1,0 +1,440 @@
+---
+title: 'Code for Chapter 1: Introduction'
+author: "Jim Albert and Maria Rizzo"
+subtitle: "R by Example, 2e (2024), Springer"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    embed-resources: true
+    number-sections: true
+---
+
+# Introduction
+
+## R and RStudio
+
+```{r}
+set.seed(1)
+```
+
+## Installing the Software
+
+```{r}
+library(RbyExample)
+```
+
+```{r}
+head(bgsu)
+```
+
+## Getting Started with R and RStudio
+
+## Basic Operations
+
+```{r}
+temps <- c(51.9, 51.8, 51.9, 53)
+temps
+```
+
+```{r}
+(temps <- c(51.9, 51.8, 51.9, 53))
+```
+
+```{r}
+temps - 32
+```
+
+```{r}
+(5/9) * (temps - 32)
+```
+
+```{r}
+CT <- c(48, 48.2, 48, 48.7)
+temps - CT
+```
+
+```{r}
+winner <- c(185, 182, 182, 188, 188, 188, 185, 185, 177, 182, 182, 193, 183, 179, 179, 175)
+opponent <- c(175, 193, 185, 187, 188, 173, 180, 177, 183, 185, 180, 180, 182, 178, 178, 173)
+```
+
+```{r}
+length(winner)
+```
+
+```{r}
+year <- seq(from = 2008, to = 1948, by = -4)
+```
+
+```{r}
+year <- seq(2008, 1948, -4)
+```
+
+```{r}
+mean(winner)
+mean(opponent)
+```
+
+```{r}
+difference <- winner - opponent
+```
+
+```{r}
+head(data.frame(year, winner, opponent, difference))
+```
+
+```{r}
+taller.won <- winner > opponent
+taller.won
+```
+
+```{r}
+table(taller.won)
+table(taller.won) / 16 * 100
+```
+
+```{r}
+barplot(rev(difference), 
+        xlab = "Election years 1948 to 2008", 
+        ylab = "Height difference in cm")
+```
+
+```{r}
+k <- c(0, 1, 2, 3, 4)
+x <- c(109, 65, 22, 3, 1)
+```
+
+```{r}
+barplot(x, names.arg = k)
+```
+
+```{r}
+p <- x / sum(x)
+p
+```
+
+```{r}
+(r <- sum(p * k))
+```
+
+```{r}
+(v <- sum(x * (k - r)^2) / 199)
+```
+
+```{r}
+deaths <- rep(k, times = x)
+table(deaths)
+```
+
+```{r}
+mean(deaths)
+var(deaths)
+```
+
+```{r}
+f <- r^k * exp(- r) / factorial(k)
+f
+```
+
+```{r}
+f <- dpois(k, lambda = r)
+f
+```
+
+```{r}
+floor(200 * f)  #expected counts
+x             #observed counts
+```
+
+```{r}
+cbind(k, p, f)
+```
+
+## Functions
+
+```{r}
+f <- function(x) {
+  return( x * (1-x) )
+}
+```
+
+```{r}
+x <- runif(5)  #a vector of Uniform(0, 1) numbers
+x
+f(x)
+```
+
+```{r}
+var.n <- function(x) {
+  v <- var(x)
+  n <- NROW(x)
+  v * (n - 1) / n
+  }
+```
+
+```{r}
+temps <- c(51.9, 51.8, 51.9, 53)
+var(temps)
+var.n(temps)
+```
+
+```{r}
+fn <- function(x, a = 1, b = 1)
+    x^(a-1) * (1-x)^(b-1)
+```
+
+```{r}
+x <- seq(0, 1, .2)  #sequence from 0 to 1 with steps of .2
+fn(x, a = 2, b = 2)
+```
+
+```{r}
+integrate(fn, lower = 0, upper = 1, a = 2, b = 2)
+```
+
+```{r}
+beta(2, 2)
+```
+
+```{r}
+integrate(function(x) {x * (1-x)}, 
+          lower = 0, upper = 1)
+```
+
+## Curves and Histograms
+
+```{r}
+curve(x*(1-x), from = 0, to = 1, ylab = "f(x)")
+```
+
+```{r}
+normaldat <- rnorm(200)
+
+hist(normaldat, prob = TRUE, breaks = "scott", 
+     main = "", xlab = "")
+curve(dnorm(x), add = TRUE, col = "red")
+lines(density(normaldat))
+```
+
+## Vectors and Matrices
+
+```{r}
+probs <- c(.45, .05, .01, .48, .70, .50, .07, .25, .49)
+P <- matrix(probs, nrow = 3, ncol = 3)
+P
+```
+
+```{r}
+Q <- matrix(c( 0.45,  0.48,  0.07,
+               0.05,  0.70,  0.25,
+               0.01,  0.50,  0.49), 
+            nrow = 3, ncol = 3, byrow = TRUE)
+Q
+```
+
+```{r}
+rownames(P) <- colnames(P) <- c("lower", "middle", "upper")
+```
+
+```{r}
+P
+```
+
+```{r}
+rowSums(P)
+```
+
+```{r}
+apply(P, MARGIN = 1, FUN = sum)
+```
+
+```{r}
+P2 <- P %*% P
+P2
+```
+
+```{r}
+P2[1, 3]
+```
+
+```{r}
+P2[1, ]
+```
+
+```{r}
+P4 <- P2 %*% P2
+P8 <- P4 %*% P4
+```
+
+```{r}
+P8
+```
+
+## Data Frames
+
+```{r}
+library(RbyExample)
+str(brainsize)
+```
+
+```{r}
+names(brainsize)
+class(brainsize$Gender)
+sapply(brainsize, class)
+```
+
+```{r}
+dim(brainsize)
+NROW(brainsize); nrow(brainsize)
+NCOL(brainsize); ncol(brainsize)
+```
+
+```{r}
+head(brainsize)
+tail(brainsize, 2)
+```
+
+```{r}
+brainsize[4:8, ]
+```
+
+```{r}
+any(is.na(brainsize))
+anyNA(brainsize)
+```
+
+```{r}
+summary(brainsize)
+```
+
+```{r}
+str(USArrests)
+head(USArrests)
+```
+
+```{r}
+summary(USArrests)
+```
+
+```{r}
+colMeans(USArrests)
+sapply(USArrests, "sd")
+sapply(USArrests, "median")
+```
+
+```{r}
+range(USArrests$UrbanPop)
+```
+
+```{r}
+sapply(USArrests, "range")
+```
+
+```{r}
+USArrests[3, "Murder"]
+USArrests[3, ]
+```
+
+```{r}
+USArrests$Assault[1:3]
+```
+
+```{r}
+with(USArrests,
+     plot(UrbanPop, Murder))
+```
+
+```{r}
+head(rownames(USArrests))
+```
+
+```{r}
+states <- rownames(USArrests)
+USArrests2 <- data.frame(State = states,
+                         USArrests,
+                         row.names = NULL)
+str(USArrests2)
+```
+
+```{r}
+Arrests <- USArrests[order(USArrests$UrbanPop), ]
+head(Arrests)
+
+# alternately precompute order
+o <- order(USArrests$UrbanPop)
+Arrests <- USArrests[o, ]
+tail(Arrests)
+```
+
+```{r}
+library(dplyr, warn.conflicts = FALSE)
+```
+
+```{r}
+USArrests |>
+  arrange(UrbanPop) -> Arrests
+head(Arrests)
+```
+
+## R Scripts
+
+```         
+# heights of winner and opponent from Example 1.2
+
+winner <- c(185, 182, 182, 188, 188, 188, 
+  185, 185, 177, 182, 182, 193, 183, 179, 
+  179, 175)
+opponent <- c(175, 193, 185, 187, 188, 173, 
+  180, 177, 183, 185, 180, 180, 182, 178, 
+  178, 173)
+year <- seq(from = 2008, to = 1948, by = -4)
+difference <- winner - opponent
+
+taller.won <- winner > opponent
+table(taller.won)
+table(taller.won) / 16 * 100
+
+barplot(rev(difference), 
+        xlab = "Election years 1948 to 2008", 
+        ylab = "Height difference in cm")
+```
+
+## Quarto and Markdown Files
+
+## Projects
+
+## The R Help System
+
+## Selected `ggplot` versions of figures in this chapter
+
+```{r}
+library(ggplot2)
+ggplot(data = USArrests, aes(x = UrbanPop, y = Murder)) +
+  geom_point()
+```
+
+```{r}
+year <- seq(1948, 2008, 4)
+diff <- rev(winner - opponent)
+df <- data.frame(year = year, diff = diff)
+```
+
+```{r}
+ggplot(data = df, aes(x = year, y = diff)) +
+  geom_col() +
+  labs(x = "Election years 1948 to 2008", y = "Height difference in cm")
+```
+
+```{r}
+library(ggplot2)
+df <- data.frame(x = normaldat)
+ggplot(df, aes(x = x)) +
+  geom_histogram()
+```
+
+```{r}
+nbin <- nclass.scott(df$x)
+ggplot(df, aes(x = x)) +
+  geom_histogram(bins = nbin, fill = "white", color = "black")
+```

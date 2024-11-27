@@ -1,0 +1,416 @@
+---
+title: 'Code for Chapter 2: Quantitative Data'
+author: "Jim Albert and Maria Rizzo"
+subtitle: "R by Example, 2e (2024), Springer"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    embed-resources: true
+    number-sections: true
+    number-offset: 1
+---
+
+# Quantitative Data
+
+## Introduction
+
+## Integer Data
+
+```{r}
+library(RbyExample)
+draftnums <- draftlottery
+```
+
+```{r}
+names(draftnums)
+```
+
+```{r}
+draftnums$Jan[15]
+```
+
+```{r}
+months <- draftnums[2:13]
+sapply(months, median)
+```
+
+```{r}
+sapply(months, median, na.rm=TRUE)
+```
+
+```{r}
+medians <- sapply(months, median, na.rm=TRUE)
+plot(medians, type="b", xlab="month number")
+```
+
+```{r}
+months <- draftnums[2:13]
+boxplot(months)
+```
+
+## Bivariate Data
+
+```{r}
+library(MASS)  #load the package
+# data()         #display available datasets
+```
+
+```{r}
+head(mammals)
+```
+
+```{r}
+summary(mammals)
+```
+
+```{r}
+boxplot(mammals)
+boxplot(log(mammals), names=c("log(body)", "log(brain)"))
+```
+
+```{r}
+plot(mammals)
+
+plot(log(mammals$body), log(mammals$brain),
+  xlab="log(body)", ylab="log(brain)")
+```
+
+```{r}
+summary(log(mammals))
+```
+
+```{r}
+cor(log(mammals))
+```
+
+```{r}
+cor(log(mammals$body), log(mammals$brain))
+```
+
+```{r}
+plot(log(mammals$body), log(mammals$brain),
+  xlab="log(body)", ylab="log(brain)")
+x <- log(mammals$body); y <- log(mammals$brain)
+abline(lm(y ~ x))
+```
+
+## Analysis of Bivariate Data by Group
+
+```{r}
+library(RbyExample)
+head(twinIQ)
+```
+
+```{r}
+summary(twinIQ)
+```
+
+```{r}
+boxplot((Foster - Biological) ~ Social, data=twinIQ)
+```
+
+```{r}
+status <- as.integer(twinIQ$Social)
+plot(Foster ~ Biological, data=twinIQ, pch=status, col=status)
+legend("topleft", c("high","low","middle"),
+  pch=1:3, col=1:3, inset=.02)
+abline(0, 1)
+```
+
+```{r}
+coplot(Foster ~ Biological|Social, data=twinIQ)
+```
+
+```{r}
+library(lattice)
+xyplot(Foster ~ Biological|Social, data=twinIQ, 
+       pch = 20, col = 1)
+```
+
+## Multivariate Data: Several Quantitative Variables
+
+```{r}
+library(RbyExample)  # ?brainsize for description
+str(brainsize)
+```
+
+```{r}
+summary(brainsize)
+```
+
+```{r}
+mean(brainsize$Weight)
+```
+
+```{r}
+mean(brainsize$Weight, na.rm = TRUE)
+```
+
+```{r}
+by(data = brainsize[, 2:7], INDICES = brainsize$Gender, 
+   FUN = colMeans, na.rm = TRUE)
+```
+
+```{r}
+with(brainsize, {
+  gender <- as.integer(factor(Gender))  
+  plot(Weight, MRI_Count, pch = gender, col = gender)
+  legend("topleft", c("Female", "Male"), 
+         pch = 1:2, col = 1:2, inset = .02)
+  })
+```
+
+```{r}
+pairs(brainsize[, 2:7], cex=.5, gap=0)
+```
+
+```{r}
+brainsize2 <- brainsize
+medIQ <- median(brainsize2$FSIQ)
+brainsize2$Group <- ifelse(brainsize2$FSIQ < medIQ, "low", "high")
+head(brainsize2$Group)
+```
+
+```{r}
+table(brainsize2$Gender, brainsize2$Group)
+by(brainsize2[2:4], brainsize2$Group, 
+   FUN = colMeans, na.rm = TRUE)
+```
+
+```{r}
+round( cor(brainsize[, 2:7]), 2)
+```
+
+```{r}
+round( cor(brainsize[, 2:7], 
+           use = "pairwise.complete.obs"), 2)
+```
+
+```{r}
+mri <- brainsize$MRI_Count / brainsize$Weight
+  cor(brainsize$FSIQ, mri, use="pairwise.complete.obs")
+```
+
+```{r}
+cor.test(brainsize$FSIQ, brainsize$MRI_Count)
+```
+
+```{r}
+cor.test(brainsize$FSIQ, mri)$p.value
+```
+
+```{r}
+which(is.na(brainsize), arr.ind=TRUE)
+```
+
+```{r}
+brainsize[c(2, 21), ]
+```
+
+```{r}
+i <- which(brainsize$Gender == "Male")
+maleWt <- mean(brainsize$Weight[i], na.rm = TRUE)
+maleHt <- mean(brainsize$Height[i], na.rm = TRUE)
+brainsize[2, 5] <- maleWt
+brainsize[21, 5] <- maleWt 
+brainsize[21, 6] <- maleHt 
+```
+
+```{r}
+brainsize[c(2, 21), ]
+```
+
+## TimeSeriesData
+
+```{r}
+nhtemp
+```
+
+```{r}
+plot(nhtemp)
+```
+
+```{r}
+plot(nhtemp, ylab="Mean annual temperatures")
+abline(h = mean(nhtemp), lty=2)
+lines(lowess(nhtemp), col=4)
+```
+
+```{r}
+diff(nhtemp)
+```
+
+```{r}
+d <- diff(nhtemp)
+plot(d, ylab="First differences of mean annual temperatures")
+abline(h = 0, lty=3, col=2)
+lines(lowess(d), col=3)
+```
+
+## Sample Means and the Central Limit Theorem
+
+```{r}
+colMeans(randu)
+var(randu)
+```
+
+```{r}
+ diag(var(randu))
+```
+
+```{r}
+cor(randu)
+```
+
+```{r}
+library(lattice)
+cloud(z ~ x + y, data=randu)
+```
+
+```{r}
+means <- rowMeans(randu)
+```
+
+```{r}
+hist(means)
+```
+
+```{r}
+plot(density(means))
+```
+
+```{r}
+truehist(means)
+curve(dnorm(x, 1/2, sd=sqrt(1/36)), add=TRUE)
+```
+
+```{r}
+qqnorm(means)
+qqline(means)
+```
+
+## Other Common Operations on Data
+
+```{r}
+mammals2 <- mammals
+m <- median(mammals2$body)
+mammals2$size <- ifelse(mammals2$body >= m, 
+                        "large", "small")
+```
+
+```{r}
+head(mammals2)
+```
+
+```{r}
+mammalsL <- subset(mammals2, size == "large")
+```
+
+```{r}
+head(mammalsL)
+```
+
+```{r}
+which(mammals2$body > 2000)
+
+mammals2[c(19, 33), ]
+```
+
+```{r}
+max(mammals2$body)
+```
+
+```{r}
+which.max(mammals2$body)
+mammals2[33, ]
+
+which.min(mammals2$body)
+mammals2[14, ]
+```
+
+```{r}
+x <- mammals[1:5, ]   #the first five
+x
+```
+
+```{r}
+o <- order(x$body)
+o
+```
+
+```{r}
+x[o, ]
+```
+
+```{r}
+o <- order(mammals$body)
+sorted.data <- mammals[o, ]
+```
+
+```{r}
+tail(sorted.data, 3)
+```
+
+```{r}
+data(mammals)
+```
+
+```{r}
+x <- mammals[1:5, ]
+round( dist(x), 2)
+```
+
+```{r}
+round( as.matrix(dist(x)), 2)
+```
+
+```{r}
+plot(log(mammals$body), log(mammals$brain),
+     xlab="log(body)", ylab="log(brain)")
+```
+
+```{r}
+plot(log(mammals$body), log(mammals$brain),
+     xlab="log(body)", ylab="log(brain)")
+y <- log(mammals[c("Chimpanzee", "Cow", "Human"), ])
+polygon(y)
+text(y, rownames(y), adj=c(1, .5), col=2)
+```
+
+```{r}
+dist(y)
+```
+
+## Selected `ggplot` versions of the figures
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+logmammals <- log(mammals)
+ggplot(logmammals, aes(x=body, y=brain)) +
+  geom_point() +
+  geom_smooth(method='lm') +
+  xlab('log(body size)') + 
+  ylab('log(brain size)')
+```
+
+```{r}
+ggplot(twinIQ, aes(x=Social, y=Foster-Biological)) + 
+  geom_boxplot()
+```
+
+```{r}
+ggplot(twinIQ, 
+       aes(x=Biological, y=Foster, shape=Social, color=Social)) +
+       geom_point() +
+       geom_abline(slope=1, intercept=0)
+```
+
+```{r}
+ggplot(twinIQ, aes(Biological, Foster)) +
+  geom_point() + 
+  facet_grid(. ~ Social)
+```

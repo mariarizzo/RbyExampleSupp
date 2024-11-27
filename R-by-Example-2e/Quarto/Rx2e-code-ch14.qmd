@@ -1,0 +1,273 @@
+---
+title: 'Code for Chapter 14: Bayesian Modeling'
+author: "Jim Albert and Maria Rizzo"
+subtitle: "R by Example, 2e (2024), Springer"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    embed-resources: true
+    number-sections: true
+    number-offset: 13
+---
+
+# Bayesian Modeling
+
+## Introduction
+
+## Learning about a Poisson Rate
+
+## A Prior Density
+
+```{r}
+curve(dgamma(x, shape = 8.6, rate = 8.3), 
+      from = 0, to = 3,
+      xlab = "Lambda", ylab = "Prior")
+```
+
+## Information Contained in the Data:  the Likelihood
+
+```{r}
+curve(dgamma(x, shape = 324, rate = 262),
+             from=0, to=3,
+   xlab="Lambda", ylab="Density")
+curve(dgamma(x, shape = 8.6, rate = 8.3),
+      add = TRUE, col = "red")
+legend("topright", c("Prior", "Likelihood"),
+       lty = c(1, 1), 
+       col = c("red", "black"))
+```
+
+## The Posterior and Inferences
+
+```{r}
+curve(dgamma(x, shape=331.6, rate= 270.3), 
+      from=0.9, to=1.6, xlab = "Lambda", ylab = "Density")
+curve(dgamma(x, shape=324, rate=262), add=TRUE, 
+      lty=2, lwd=2)
+legend("topright", c("Posterior", "Likelihood"), 
+       lty=c(1, 2),  
+      lwd=c(1, 2))
+```
+
+```{r}
+qgamma(0.5, shape=331.6, rate=270.3)
+```
+
+```{r}
+qgamma(c(0.05, 0.95), shape=331.6, rate=270.3)
+```
+
+```{r}
+sim.post <- rgamma(1000, shape=331.6, rate=270.3)
+```
+
+```{r}
+hist(sim.post, freq=FALSE, main="", xlab="Lambda")
+curve(dgamma(x, shape=331.6, rate=270.3), add=TRUE)
+```
+
+```{r}
+quantile(sim.post,c(0.05, 0.5, 0.95))
+```
+
+## Simulating a Probability Distribution by a Random Walk
+
+```{r}
+mylogpost <- function(lambda, shape, rate) 
+  dgamma(lambda, shape, rate, log=TRUE)
+```
+
+```{r}
+mh_rw <- function(logpost, current, C, iter, ...){
+  S <- rep(0, iter)
+  n.accept <- 0
+  for(j in 1:iter){
+    candidate <- runif(1, min=current - C, max=current + C)
+    prob <- exp(logpost(candidate, ...) - logpost(current, ...))
+    accept <- ifelse(runif(1) < prob, "yes", "no")
+    current <- ifelse(accept == "yes", candidate, current)
+    S[j] <- current 
+    n.accept <- n.accept + (accept == "yes")
+  }
+  list(S = S, accept.rate = n.accept / iter)
+}
+```
+
+```{r}
+sim <- mh_rw(mylogpost, 1, 0.2,  1000, 331.6, 270.3)
+```
+
+```{r}
+sim1 <- mh_rw(mylogpost, 1, 0.02,  1000, 331.6, 270.3)
+sim2 <- mh_rw(mylogpost, 1, 0.2,  1000, 331.6, 270.3)
+sim3 <- mh_rw(mylogpost, 1, 1.0,  1000, 331.6, 270.3)
+```
+
+```{r}
+library(ggplot2)
+sim_lambda <- c(sim1$S, sim2$S, sim3$S)
+iteration <- rep(1:1000, 3)
+type <- c(rep("c = 0.02", 1000), rep("c = 0.2", 1000),
+          rep("c = 1.0", 1000))
+df <- data.frame(sim_lambda, iteration, type)
+ggplot(data = df, aes(iteration, sim_lambda)) +
+  geom_line() +
+  facet_wrap(~ type, ncol = 1)
+```
+
+```{r}
+ggplot(data = df, aes(sim_lambda)) +
+  geom_density() +
+  facet_wrap(~ type, ncol = 1) +
+  geom_rug(sides = "b")
+```
+
+```{r}
+mylogpost = function(lambda){
+ dgamma(lambda, shape=324, rate=262, log=TRUE) +
+   dnorm(lambda, mean=2.0, sd=0.2, log=TRUE)
+}
+```
+
+## Bayesian Model Checking
+
+```{r}
+lambda <- rgamma(1, shape=331.6, rate=270.3)
+ys <- rpois(1, lambda)
+```
+
+```{r}
+table(ys)
+```
+
+```{r}
+sim.y <- function(){
+  lambda <- rgamma(1, shape=331.6, rate=270.3)
+  ys <- rpois(262, lambda)
+  H <- hist(ys, seq(-.5,9.5,1), plot=FALSE)
+  data.frame(y = H$mids, f = H$counts)
+}
+```
+
+```{r}
+library(lattice)
+D <- data.frame(Type=rep("Obs", 7), y=c(0:6),
+                f = c(90, 93, 42, 17, 8, 9, 3))
+for(j in 1:8){
+   sim.out <- sim.y()
+   D <- rbind(D, data.frame(Type = paste("Sim",j),
+     y = sim.out$y, f = sim.out$f))
+}
+xyplot(f ~ y | Type, data=D, type="h", lwd=3)
+```
+
+
+```{r}
+sim.y2 <- function(){
+  lambda <- rgamma(1, shape=331.6, rate=270.3)
+  ys <- rpois(262, lambda)
+  sum(ys >= 4)
+}
+Tsim <- replicate(1000, sim.y2())
+hist(Tsim)
+abline(v = 20)
+```
+
+## Negative Binomial Modeling
+
+```{r}
+mh_rw2 <- function(logpost2, curr, iter, scale, ...){
+  S <- matrix(0, iter, 2)
+  n.accept <- 0
+  cand <- c(0, 0)
+  for(j in 1:iter){
+    cand[1] <- runif(1, min=curr[1] - scale[1], 
+      max=curr[1] + scale[1])
+    cand[2] <- runif(1, min=curr[2] - scale[2], 
+      max=curr[2] + scale[2])
+    prob <- exp(logpost2(cand, ...) - logpost2(curr, ...))
+    accept <- ifelse(runif(1) < prob, "yes", "no")
+    if(accept == "yes") curr <- cand
+    S[j, ] <- curr
+    n.accept <- n.accept + (accept == "yes")
+  }
+  list(S = S, accept.rate = n.accept / iter)
+}
+```
+
+```{r}
+lognbpost <- function(theta, data){
+  sum(data$f * dnbinom(data$y, size=exp(theta[1]),
+    prob = exp(theta[1]) / sum(exp(theta)), log=TRUE)) +
+    sum(theta) - 2 * log(1 + exp(theta[1])) - 
+      2 * log(1 + exp(theta[2]))
+}
+```
+
+```{r}
+dat <- list(y=0:6, f=c(90, 93, 42, 17, 8, 9, 3))
+```
+
+```{r}
+sim.fit <- mh_rw2(lognbpost, c(1, 0), 10000, 
+                  c(1.0, 0.2), dat)
+```
+
+```{r}
+sim.fit$accept.rate
+```
+
+```{r}
+library(ggdensity)
+post_df <- data.frame(sim.fit$S)
+names(post_df) <- c("log_a", "log_b")
+ggplot(post_df, aes(log_a, log_b)) +
+  geom_hdr_lines()
+```
+
+```{r}
+a <- exp(sim.fit$S[ ,1])
+```
+
+```{r}
+plot(density(a), xlab="a", ylab="Density", main="")
+```
+
+```{r}
+quantile(a, c(0.05, 0.95))
+```
+
+```{r}
+mu <- exp(sim.fit$S[ ,2])
+```
+
+```{r}
+plot(density(mu), xlab="mu", ylab="Density", main="")
+```
+
+```{r}
+quantile(mu, c(0.05, 0.95))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

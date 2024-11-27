@@ -1,0 +1,255 @@
+---
+title: 'Code for Chapter 8: Regression'
+author: "Jim Albert and Maria Rizzo"
+subtitle: R by Example, 2e (2024), Springer
+format:
+  html:
+    number-sections: true
+    theme: cosmo
+    toc: true
+    embed-resources: true
+    number-offset: 7
+---
+
+# Regression
+
+## Introduction
+
+## Simple Linear Regression
+
+```{r}
+plot(cars)    
+```
+
+```{r}
+lm(dist ~ speed, data = cars)
+```
+
+```{r}
+L1 <- lm(dist ~ speed, data = cars)
+print(L1)
+```
+
+```{r}
+plot(cars, main = "dist = -17.579 + 3.932 speed", xlim = c(0, 25))
+#line with intercept=-17.579, slope=3.932
+abline(-17.579, 3.932)
+curve(-17.579 + 3.932*x, add = TRUE)  #same thing
+```
+
+```{r}
+plot(L1, which=1, add.smooth=FALSE)
+```
+
+```{r}
+L2 <- lm(dist ~ 0 + speed, data = cars)
+L2
+```
+
+```{r}
+plot(cars, main = "dist = 2.909 speed", xlim = c(0, 25))
+#line with intercept=0, slope=2.909
+abline(0, 2.909)
+```
+
+## Regression Analysis for Data with Two Predictors
+
+```{r}
+Trees <- trees
+names(Trees)[1] <- "Diam"
+```
+
+```{r}
+pairs(Trees)
+cor(Trees)
+```
+
+```{r}
+M1 <- lm(Volume ~ Diam, data = Trees)
+print(M1)
+```
+
+```{r}
+with(Trees, {
+  plot(Diam, Volume) #response vs predictor
+  abline(M1$coef) #add fitted line
+})
+```
+
+```{r}
+new <- data.frame(Diam = 16)
+predict(M1, new)
+```
+
+```{r}
+plot(M1, which=1:2)
+```
+
+```{r}
+M2 <- lm(Volume ~ Diam + Height, data = Trees)
+print(M2)
+```
+
+```{r}
+M3 <- lm(Volume ~ Diam + I(Diam^2) + Height, data = Trees)
+print(M3)
+```
+
+```{r}
+plot(M3, which = 1:2)
+```
+
+```{r}
+summary(M3)
+```
+
+```{r}
+(broom::tidy(M3) -> t1)
+```
+
+```{r}
+t1[3, 5] #the p-value for the quadratic term
+```
+
+```{r}
+anova(M3)
+```
+
+```{r}
+anova(M1, M2, M3)
+```
+
+```{r}
+new <- data.frame(Diam = 16, Height = 70)
+predict(M3, newdata = new)
+```
+
+```{r}
+predict(M3, newdata = new, interval = "pred")
+```
+
+```{r}
+predict(M3, newdata = new, interval = "conf")
+```
+
+```{r}
+diameter <- 16
+height <- seq(65, 70, 1)
+new <- data.frame(Diam=diameter, Height=height)
+predict(M3, newdata=new, interval="conf")
+```
+
+## Fitting a Regression Curve
+
+```{r}
+library(RbyExample)
+```
+
+```{r}
+luna <- lunatics
+names(luna) <- tolower(names(lunatics))
+```
+
+```{r}
+scatter.smooth(luna$dist, luna$phome)
+cor(luna$dist, luna$phome)
+```
+
+```{r}
+library(ggplot2)
+ggplot(luna, aes(dist, phome)) + 
+  geom_point() +
+  geom_smooth(method = "loess", se = FALSE)
+```
+
+```{r}
+luna$rdist <- 1 / luna$dist
+plot(luna$rdist, luna$phome)
+cor(luna$rdist, luna$phome)
+```
+
+```{r}
+M <- lm(phome ~ rdist, data = luna)
+M
+```
+
+```{r}
+plot(luna$rdist, luna$phome)
+abline(M)
+```
+
+```{r}
+plot(luna$dist, luna$phome)
+curve(M$coef[1] + M$coef[2] / x, add = TRUE)
+```
+
+```{r}
+fn <- function(x) {M$coef[1] + M$coef[2] / x}
+
+ggplot(luna, aes(dist, phome)) +
+  geom_point() +
+  geom_function(fun = fn)
+```
+
+```{r}
+plot(M$fitted, M$resid, xlab = "fitted", ylab = "residuals")
+abline(h = 0, lty = 2)
+```
+
+```{r}
+luna[13, ]
+```
+
+```{r}
+str(CPUspeed)
+summary(CPUspeed)
+```
+
+```{r}
+years <- CPUspeed$time - 1994
+speed <- CPUspeed$speed
+log2speed <- CPUspeed$log10speed / log10(2)
+```
+
+```{r}
+plot(years, speed)
+plot(years, log2speed)
+```
+
+```{r}
+L <- lm(log2speed ~ years)
+print(L)
+```
+
+```{r}
+plot(years, speed)
+curve(2^(-3.6581 + 0.5637 * x), add = TRUE)
+```
+
+```{r}
+plot(years, log2speed)
+abline(L)
+```
+
+```{r}
+plot(L, which = 1:2)
+```
+
+```{r}
+CPUspeed[c(16, 26, 27), ]
+```
+
+```{r}
+summary(L)$r.squared
+```
+
+```{r}
+new <- data.frame(years = 2005 + 316.5 / 365 - 1994)
+lyhat <- predict(L, newdata=new)
+lyhat
+```
+
+```{r}
+2^lyhat
+```
+

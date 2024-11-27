@@ -1,0 +1,351 @@
+---
+title: 'Code for Chapter 6: Importing Data'
+author: "Jim Albert and Maria Rizzo"
+subtitle: "R by Example, 2e (2024), Springer"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    embed-resources: true
+    number-sections: true
+    number-offset: 5
+---
+
+# Importing Data
+
+## Introduction
+
+This chapter requires several text files of data. The files can be downloaded from <https://github.com/mariarizzo/RbyExampleSupp/tree/master>.
+
+```{r}
+## edit the line below to change path to data files 
+
+datapath <- "datafiles/"
+```
+
+## Import Data Using `read.table` or `read.csv`
+
+```{r}
+(filename <- paste0(datapath, "bgsu.txt"))
+```
+
+```{r}
+BGSU <- read.table(filename, header = TRUE) 
+```
+
+```{r}
+str(BGSU)
+```
+
+```{r}
+head(BGSU)
+summary(BGSU)
+```
+
+```{r}
+any(is.na(BGSU))
+anyNA(BGSU)
+```
+
+```{r}
+(filename <- paste0(datapath, "wasterunup.txt"))
+dat <- read.table(filename)
+str(dat)
+head(dat)
+```
+
+```{r}
+dat <- read.table(filename, header = TRUE)
+str(dat)
+tail(dat)
+```
+
+```{r}
+dat <- read.table(filename, header=TRUE, 
+                  na.strings="*")
+str(dat)
+tail(dat)
+```
+
+```{r}
+summary(dat)
+```
+
+```{r}
+dat2 <- stack(dat)
+str(dat2)
+```
+
+```{r}
+summary(dat2)
+```
+
+```{r}
+dat2 <- na.omit(dat2)
+names(dat2)[2] <- "plant"
+summary(dat2)
+```
+
+```{r}
+(filename <- paste0(datapath, "lunatics.txt"))
+MAlunatics <- read.table(filename, header = TRUE, 
+                         stringsAsFactors = TRUE)
+str(MAlunatics)
+anyNA(MAlunatics)
+```
+
+```{r}
+names(MAlunatics) <- tolower(names(MAlunatics))
+head(MAlunatics)
+```
+
+```{r}
+subset(MAlunatics, 
+       subset=!(county %in%  c("DUKES", "NANTUCKET")),
+       select=c(county, dist, phome)) -> MAlunatics1
+MAlunatics1 <- droplevels(MAlunatics1)
+str(MAlunatics1)
+```
+
+## Importing Data Using `readr` Functions
+
+```{r}
+library(readr)
+library(stringr)
+library(dplyr)
+```
+
+```{r}
+(filename <- paste0(datapath, "lunatics.csv"))
+MAlunatics <- read_csv(filename)
+MAlunatics[1:4, ]
+anyNA(MAlunatics)
+```
+
+```{r}
+names(MAlunatics) <- str_to_lower(names(MAlunatics))
+MAlunatics$county <- str_to_title(MAlunatics$county)
+```
+
+```{r}
+MAlunatics |> 
+  filter(!(county %in% c("Dukes", "Nantucket"))) |>
+  droplevels() |> 
+  select(county, dist, phome) |>
+  mutate_at(vars(county), factor) -> MAlunatics2
+```
+
+```{r}
+cbind(MAlunatics1, MAlunatics2)
+```
+
+```{r}
+all.equal(MAlunatics1, MAlunatics2, 
+          check.attributes = FALSE)
+```
+
+## Import Text Data from a Web Page
+
+```{r}
+webfile <- "https://www.itl.nist.gov/div898/strd/univ/data/PiDigits.dat" 
+ 
+pidigits <- read.table(webfile, skip = 60)
+str(pidigits)
+```
+
+```{r}
+table(pidigits)
+```
+
+## Recoding Data or Factor Levels
+
+```{r}
+webfile <- "https://gksmyth.github.io/ozdasl/general/babies.txt"
+babies <- read.table(webfile, header=TRUE, sep="\t")
+str(babies)
+anyNA(babies)
+```
+
+```{r}
+group <- ifelse(babies$Age < 12, 1, 
+                  ifelse(babies$Age == 12, 2, 3))
+plot(babies$x1, babies$x2, pch = group, col = group)
+legend("topleft", 
+         legend = c("3mths", "12mths", "24mths"), 
+         pch = 1:3, col = 1:3)
+```
+
+```{r}
+library(readr)
+webfile <- "https://gksmyth.github.io/ozdasl/general/babies.txt"
+dat <- read_delim(webfile, delim="\t")
+```
+
+```{r}
+library(readr)
+webfile <- "https://gksmyth.github.io/ozdasl/general/babies.txt"
+dat <- read_delim(webfile, delim = "\t",
+                  col_types = list(Age="i"))
+
+glimpse(dat)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(forcats)
+
+mutate(dat,
+       Ages = case_when(Age < 12 ~ "3 mths",
+                        Age == 12 ~ "12 mths",
+                        .default = "24 mths")) -> dat
+
+dat$Ages <- as_factor(dat$Ages)
+
+table(dat$Ages)
+```
+
+```{r}
+ggplot(dat, aes(x1, x2, color=Ages, shape=Ages)) +
+  geom_point(size=2)
+```
+
+## Reshaping Data from Wide to Long Format
+
+```{r}
+library(bootstrap)
+str(scor)
+```
+
+```{r}
+# method 1: stack (utils)
+scor.long <- stack(scor)
+names(scor.long)
+id <- rep(1:88, times=5)
+scor.long$id <- id
+names(scor.long) <- c("score", "exam", "id")
+
+# checking the result
+str(scor.long)
+tail(scor.long, 3)
+```
+
+```{r}
+# method 2: reshape (stats)
+reshape(scor, direction = "long", 
+        varying = names(scor), 
+        timevar = "exam", 
+        times = names(scor), 
+        v.names = "score") -> s
+
+# check the result
+str(s)
+tail(s)
+```
+
+```{r}
+# method 3: melt (reshape2)
+
+library(reshape2)
+scores2 <- scor
+scores2$id <- 1:88
+melt(scores2, measure.vars = 1:5, 
+     id.vars = "id",
+     value.name = "score", 
+     variable.name = "exam") -> s2
+
+# check result
+str(s2)
+```
+
+```{r}
+# method 4: pivot_longer (tidyr)
+library(tidyr, warn.conflicts = FALSE)
+pivot_longer(scores2, 
+            cols = -id, 
+            names_to = "exam",
+            values_to = "score") -> s3
+
+glimpse(s3)
+```
+
+```{r}
+library(dplyr)
+s3 %>% mutate_at(vars(exam), factor) %>%
+  glimpse() -> s4
+```
+
+## Unstacking
+
+```{r}
+summary(warpbreaks)
+```
+
+```{r}
+warpbreaks2 <- unstack(warpbreaks, 
+                       form = "breaks ~ wool:tension")
+str(warpbreaks2)
+head(warpbreaks2) #wide format
+```
+
+## Missing Data
+
+```{r}
+library(readr)
+(filename <- paste0(datapath, "wasterunup.txt"))
+wr <- read_table(filename, na = "*")
+head(wr)
+```
+
+```{r}
+(filename <- paste0(datapath, "college.txt"))
+collg <- read.table(filename, 
+                    header = TRUE, sep = "\t", 
+                    stringsAsFactors = TRUE)
+str(collg)
+```
+
+```{r}
+sum(is.na(collg))
+```
+
+```{r}
+comp <- complete.cases(collg)
+collg2 <- collg[comp, ]
+anyNA(collg2)
+NROW(collg2)
+```
+
+```{r}
+colSums(is.na(collg))
+```
+
+```{r}
+## sapply(collg, FUN=function(x) {sum(is.na(x))} )
+```
+
+```{r}
+library(dplyr)
+collg %>%
+  summarize(across(everything(), ~ sum(is.na(.))))
+```
+
+```{r}
+collg3 <- collg[ , -c(9:11)]
+collg4 <- collg3[complete.cases(collg3), ]
+nrow(collg4)
+```
+
+```{r}
+nmiss <- rowSums(is.na(collg3))
+i <- which(nmiss > 0)
+i
+```
+
+```{r}
+knitr::kable(collg3[i, ])
+```
+
+```{r}
+sapply(collg3[,-1], sd, na.rm = TRUE)
+```

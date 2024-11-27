@@ -1,0 +1,275 @@
+---
+title: 'Code for Chapter 3: Categorical Data'
+author: "Jim Albert and Maria Rizzo"
+subtitle: "R by Example, 2e (2024), Springer"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    embed-resources: true
+    number-sections: true
+    number-offset: 2
+---
+
+# Categorical Data
+
+## Introduction
+
+```{r}
+tosses <- c("H", "T", "H", "H", "T", "H", "H",
+           "T", "H", "H", "T", "T", "H", "T",
+           "T", "T", "H", "H", "H", "T")
+```
+
+```{r}
+table(tosses)
+```
+
+```{r}
+table(tosses) / length(tosses)
+```
+
+```{r}
+prop.tosses <- table(tosses) / length(tosses)
+```
+
+```{r}
+plot(prop.tosses)
+barplot(prop.tosses)
+```
+
+```{r}
+y <- c(1, 4, 3, 5, 4, 2, 4)
+```
+
+```{r}
+possible.rolls <- c(1, 2, 3, 4, 5, 6)
+```
+
+```{r}
+labels.rolls <- c("one", "two", "three", "four", "five", "six")
+```
+
+```{r}
+fy <- factor(y, levels=possible.rolls, labels=labels.rolls)
+```
+
+```{r}
+fy
+```
+
+```{r}
+table(fy)
+```
+
+## Chi-square Goodness-of-Fit Test
+
+```{r}
+k <- 0:12
+p <- dbinom(k, size=12, prob=1/3)
+```
+
+```{r}
+Binom <- round(26306 * p)
+names(Binom) <- k
+```
+
+```{r}
+Weldon <- c(185, 1149, 3265, 5475, 6114, 5194, 3067,
+   1331, 403, 105, 14, 4, 0)
+names(Weldon) <- k
+```
+
+```{r}
+counts <- cbind(Binom, Weldon)
+barplot(counts, beside=TRUE)
+```
+
+```{r}
+plot(k, Binom, type="h", lwd=2, lty=1, ylab="Count")
+lines(k + .2, Weldon, type="h", lwd=2, lty=2)
+legend("topright", legend=c("Binomial", "Weldon"),
+       lty=c(1,2), lwd=c(2,2), bty="n")
+```
+
+```{r}
+cWeldon <- c(Weldon[1:10], sum(Weldon[11:13]))
+cWeldon
+```
+
+```{r}
+probs <- c(p[1:10], 1 - sum(p[1:10]))
+chisq.test(cWeldon, p=probs)
+```
+
+```{r}
+test <- chisq.test(cWeldon, p=probs)
+plot(0:10, test$residuals,
+   xlab="k", ylab="Residual")
+abline(h=0)
+```
+
+## Relating Two Categorical Variables
+
+```{r}
+library(RbyExample)
+twn <- twins
+```
+
+```{r}
+table(twn$EDUCL)
+table(twn$EDUCH)
+```
+
+```{r}
+c.EDUCL <- cut(twn$EDUCL, breaks=c(0, 12, 15, 16, 24),
+   labels=c("High School", "Some College", "College Degree",
+   "Graduate School"))
+c.EDUCH <- cut(twn$EDUCH, breaks=c(0, 12, 15, 16, 24),
+   labels=c("High School", "Some College", "College Degree",
+   "Graduate School"))
+```
+
+```{r}
+table(c.EDUCL)
+prop.table(table(c.EDUCL))
+```
+
+```{r}
+barplot(prop.table(table(c.EDUCL)), cex.names=.7)
+```
+
+```{r}
+mosaicplot(table(c.EDUCL), main="")
+```
+
+```{r}
+table(c.EDUCL, c.EDUCH)
+```
+
+```{r}
+T1 <- table(c.EDUCL, c.EDUCH)
+diag(T1)
+```
+
+```{r}
+sum(diag(T1)) / sum(T1)
+```
+
+```{r}
+plot(T1, main="")
+```
+
+## Association Patterns in Contingency Tables
+
+```{r}
+c.wage <- cut(twn$HRWAGEL, c(0, 7, 13, 20, 150))
+```
+
+```{r}
+table(c.wage)
+```
+
+```{r}
+table(c.EDUCL, c.wage)
+```
+
+```{r}
+T2 <- table(c.EDUCL, c.wage)
+prop.table(T2, margin = 1)
+```
+
+```{r}
+P <- prop.table(T2, 1)
+barplot(t(P), ylim=c(0, 1.55), ylab="Proportion",
+   cex.names=.75,
+   legend.text=dimnames(P)$c.wage,  
+   args.legend=list(x = "topright", bty="n"))
+```
+
+```{r}
+barplot(t(P), beside=TRUE, ylab="PROPORTION",  
+   legend.text=dimnames(P)$c.wage,
+   args.legend=list(x="topleft", bty="n"))
+```
+
+## Testing Independence by a Chi-square Test
+
+```{r}
+T2 <- table(c.EDUCL, c.wage)
+```
+
+```{r}
+S <- chisq.test(T2)
+```
+
+```{r}
+print(S)
+```
+
+```{r}
+S$expected
+```
+
+```{r}
+sum((T2 - S$expected) ^ 2 / S$expected)
+```
+
+```{r}
+1 - pchisq(54.57759, df=9)
+```
+
+```{r}
+
+names(S)
+```
+
+```{r}
+S$residuals
+```
+
+```{r}
+mosaicplot(T2, shade=FALSE)
+mosaicplot(T2, shade=TRUE)
+```
+
+## Selected `ggplot` versions of the figures
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+df2 <- data.frame(
+          group=factor(rep(c("Binomial","Weldon"),each=13)),
+          k=rep(0:12, times=2), 
+          n=c(Binom, Weldon))
+```
+
+```{r}
+ggplot(df2, aes(x=group, y=n, fill=group)) +
+  geom_col(color='black', position='dodge2')
+
+ggplot(df2, aes(x=k, y=n)) + 
+  geom_col(color=1, fill=5) +
+  facet_wrap(.~group)
+```
+
+```{r}
+ggplot(df2, aes(x=k, y=n, fill=group, color=group)) +  
+  geom_col(position='dodge')
+```
+
+```{r}
+P <- prop.table(T2, 1)
+df3 <- as.data.frame(P)
+names(df3) <- c("Education", "Wage", "Proportion")
+str(df3)
+```
+
+```{r}
+ggplot(df3, aes(x=Education, y=Proportion, fill=Wage)) +
+  geom_col(color=1) +
+  scale_fill_brewer() +
+  labs(fill="Wage")
+```
